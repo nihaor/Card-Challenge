@@ -67,6 +67,8 @@ h1 {
 /* 正面樣式，預設隱藏 */
 .card .front {
   transform: rotateY(180deg);
+  object-fit: contain; /* 保持圖片比例，避免被拉伸 */
+  width: 90%; /* 控制寬度比例 */
 }
 
 /* 背面樣式，預設顯示 */
@@ -100,30 +102,4 @@ button {
 
 button:hover {
   background-color: #45a049;
-}
-
-/* 隱藏排行榜的初始樣式 */
-.hidden {
-  display: none;
-}
-
-/* 排行榜容器樣式 */
-#leaderboard-container {
-  margin-top: 20px;
-  border: 2px solid #ccc;
-  padding: 10px;
-  max-width: 300px;
-  background-color: white;
-  text-align: left;
-}
-
-#leaderboard {
-  list-style-type: none;
-  padding: 0;
-}
-
-#leaderboard li {
-  margin: 5px 0;
-  padding: 5px;
-  border-bottom: 1px solid #ccc;
 }
