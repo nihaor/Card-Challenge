@@ -4,10 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memory Card Matching Game</title>
-  <!-- 連結樣式檔 -->
   <link rel="stylesheet" href="style.css">
 </head>
-<!-- <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dolorem sequi hic architecto mollitia velit porro, a reprehenderit doloremque quia laudantium nesciunt sit adipisci quas perferendis molestias laboriosam ratione repellendus facilis!</p> -->
 <body>
   <!-- 頁面標題 -->
   <h1>洗滌標籤大挑戰！！</h1>
@@ -16,6 +14,15 @@
   <div id="game-info">
     <p>分數：<span id="score">0</span></p>
     <p>剩餘時間：<span id="timer">60</span> 秒</p>
+  </div>
+
+  <!-- 排行榜按鈕 -->
+  <button id="toggle-leaderboard">顯示排行榜</button>
+
+  <!-- 排行榜容器 -->
+  <div id="leaderboard-container" class="hidden">
+    <h2>排行榜</h2>
+    <ul id="leaderboard"></ul>
   </div>
 
   <!-- 遊戲區域 -->

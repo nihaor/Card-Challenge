@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const scoreElement = document.getElementById("score");
   const timerElement = document.getElementById("timer");
   const restartButton = document.getElementById("restart");
+  const toggleLeaderboardButton = document.getElementById("toggle-leaderboard");
+  const leaderboardContainer = document.getElementById("leaderboard-container");
+  const leaderboardList = document.getElementById("leaderboard");
 
   // 音效設定
   const flipSound = new Audio("sounds/flip.mp3");
@@ -12,13 +15,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 遊戲狀態變數
   let flippedCards = [];
-  let isChecking = false; // 判斷是否正在檢查卡片
-  let score = 0; // 玩家分數
-  let matchedPairs = 0; // 已配對成功的卡片數
-  let cardData = []; // 存放卡片數據的陣列
-  let timer = null; // 計時器
-  let timeLeft = 60; // 時間限制（秒）
-  let hasStarted = false; // 判斷遊戲是否已開始
+  let isChecking = false;
+  let score = 0;
+  let matchedPairs = 0;
+  let cardData = [];
+  let timer = null;
+  let timeLeft = 60;
+  let hasStarted = false;
+  let timerStarted = false;
+
+  // 排行榜數據
+  const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
 
   /**
    * 隨機打亂陣列
@@ -42,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
       data.push({ id: i, img: `images/front${i}.png` });
       data.push({ id: i, img: `images/front${i}.png` });
     }
-    shuffle(data); // 打亂卡片順序
+    shuffle(data);
     return data;
   }
 
@@ -50,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
    * 渲染卡片到遊戲區域
    */
   function renderCards() {
-    gameBoard.innerHTML = ""; // 清空遊戲區域
+    gameBoard.innerHTML = "";
     cardData.forEach((card) => {
       const cardElement = document.createElement("div");
       cardElement.classList.add("card");
@@ -76,6 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
     score = 0;
     matchedPairs = 0;
     hasStarted = false;
+    timerStarted = false;
     scoreElement.textContent = score;
 
     cardData = generateCardData();
@@ -88,29 +96,46 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
-   * 開始計時
+   * 開始計時器
    */
   function startTimer() {
+    timerStarted = true;
     timer = setInterval(() => {
-      timeLeft--;
-      timerElement.textContent = timeLeft;
-
-      if (timeLeft === 0) {
+      if (timeLeft > 0) {
+        timeLeft--;
+        timerElement.textContent = timeLeft;
+      } else {
         clearInterval(timer);
-        gameOverSound.play();
-        alert("可惜了! 等等可以再邀朋友來挑戰看看!!");
-        disableAllCards(); // 禁用所有卡片
+        endGame("時間到！");
       }
     }, 1000);
   }
 
   /**
-   * 禁用所有卡片
+   * 結束遊戲並輸入名字
+   * @param {string} message - 顯示的訊息
    */
-  function disableAllCards() {
-    const cards = document.querySelectorAll(".card");
-    cards.forEach((card) => {
-      card.style.pointerEvents = "none";
+  function endGame(message) {
+    clearInterval(timer);
+    alert(`${message} 您的得分是：${score}`);
+    const playerName = prompt("請輸入您的名字：", "玩家");
+    if (playerName) {
+      leaderboard.push({ name: playerName, score });
+      leaderboard.sort((a, b) => b.score - a.score); // 依分數由高到低排序
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+      updateLeaderboard();
+    }
+  }
+
+  /**
+   * 更新排行榜顯示
+   */
+  function updateLeaderboard() {
+    leaderboardList.innerHTML = "";
+    leaderboard.forEach((entry, index) => {
+      const listItem = document.createElement("li");
+      listItem.textContent = `${index + 1}. ${entry.name} - ${entry.score} 分`;
+      leaderboardList.appendChild(listItem);
     });
   }
 
@@ -123,8 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
       card.addEventListener("click", () => {
         if (isChecking || card.classList.contains("flipped")) return;
 
-        if (!hasStarted) {
-          hasStarted = true;
+        if (!timerStarted) {
           startTimer();
         }
 
@@ -146,11 +170,8 @@ document.addEventListener("DOMContentLoaded", () => {
             isChecking = false;
 
             if (matchedPairs === 10) {
-              clearInterval(timer);
               winSound.play();
-              setTimeout(() => {
-                alert(`你好厲害!成功認出所有洗滌標籤，得分：${score}`);
-              }, 500);
+              endGame("恭喜你成功配對！");
             }
           } else {
             setTimeout(() => {
@@ -165,11 +186,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 重新開始按鈕邏輯
-  restartButton.addEventListener("click", () => {
-    clearInterval(timer);
-    initGame();
+  toggleLeaderboardButton.addEventListener("click", () => {
+    leaderboardContainer.classList.toggle("hidden");
+    toggleLeaderboardButton.textContent = leaderboardContainer.classList.contains("hidden")
+      ? "顯示排行榜"
+      : "隱藏排行榜";
   });
 
-  initGame(); // 初始化遊戲
+  restartButton.addEventListener("click", initGame);
+
+  initGame();
+  updateLeaderboard();
 });
