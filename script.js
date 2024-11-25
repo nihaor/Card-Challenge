@@ -1,17 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // DOM 元素選取
   const gameBoard = document.querySelector(".game-board");
   const timerElement = document.getElementById("timer");
   const restartButton = document.getElementById("restart");
+  const leaderboardContainer = document.getElementById("leaderboard-container");
+  const leaderboardList = document.getElementById("leaderboard");
+  const nameModal = document.getElementById("name-modal");
+  const playerNameInput = document.getElementById("player-name");
+  const submitNameButton = document.getElementById("submit-name");
+  const showLeaderboardButton = document.getElementById("show-leaderboard");
+  const clearLeaderboardButton = document.getElementById("clear-leaderboard");
 
-  // 音效設定
-  const flipSound = new Audio("sounds/flip.mp3");
-  const matchSound = new Audio("sounds/match.mp3");
-  const winSound = new Audio("sounds/win.mp3");
-  const backgroundMusic = new Audio("sounds/background.mp3");
-  backgroundMusic.loop = true;
-
-  // 遊戲狀態變數
   let flippedCards = [];
   let isChecking = false;
   let matchedPairs = 0;
@@ -20,8 +18,50 @@ document.addEventListener("DOMContentLoaded", () => {
   let startTime = null;
   let hasStarted = false;
 
-  // ===== 遊戲功能 =====
-  // 洗牌函數
+  function updateLeaderboard() {
+    const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+    leaderboardList.innerHTML = "";
+
+    leaderboard
+      .sort((a, b) => a.time - b.time)
+      .forEach((entry, index) => {
+        const listItem = document.createElement("li");
+        listItem.textContent = `${index + 1}. ${entry.name} - ${entry.time} 秒`;
+        leaderboardList.appendChild(listItem);
+      });
+  }
+
+  function saveScore(name, time) {
+    const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+    leaderboard.push({ name, time });
+    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+    updateLeaderboard();
+  }
+
+  submitNameButton.addEventListener("click", () => {
+    const playerName = playerNameInput.value.trim();
+    if (playerName) {
+      const totalTime = parseFloat(timerElement.textContent);
+      saveScore(playerName, totalTime);
+      nameModal.classList.add("hidden");
+      playerNameInput.value = "";
+    }
+  });
+
+  showLeaderboardButton.addEventListener("click", () => {
+    const leaderboard = document.getElementById("leaderboard");
+    leaderboard.classList.toggle("hidden");
+    leaderboard.style.display = leaderboard.style.display === "none" || !leaderboard.style.display ? "block" : "none";
+    updateLeaderboard();
+  });
+
+  clearLeaderboardButton.addEventListener("click", () => {
+    if (confirm("確定要清除排行榜嗎？")) {
+      localStorage.removeItem("leaderboard");
+      updateLeaderboard();
+    }
+  });
+
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -29,7 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 生成卡片數據
   function generateCardData() {
     const data = [];
     for (let i = 1; i <= 10; i++) {
@@ -40,9 +79,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return data;
   }
 
-  // 渲染卡片
   function renderCards() {
-    gameBoard.innerHTML = ""; // 清空遊戲區域
+    gameBoard.innerHTML = "";
     cardData.forEach((card) => {
       const cardElement = document.createElement("div");
       cardElement.classList.add("card");
@@ -59,7 +97,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 初始化遊戲
+  function startTimer() {
+    startTime = Date.now();
+    timer = setInterval(() => {
+      const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
+      timerElement.textContent = `遊戲時間： ${elapsedTime} 秒`;
+    }, 100);
+  }
+
   function initGame() {
     flippedCards = [];
     isChecking = false;
@@ -71,41 +116,21 @@ document.addEventListener("DOMContentLoaded", () => {
     addCardEventListeners();
 
     clearInterval(timer);
-    timerElement.textContent = "0.00 秒";
-    backgroundMusic.pause();
-    backgroundMusic.currentTime = 0;
+    timerElement.textContent = "遊戲時間： 0.00 秒";
   }
 
-  // 計時功能
-  function startTimer() {
-    startTime = Date.now();
-    timer = setInterval(() => {
-      const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-      timerElement.textContent = `${elapsedTime} 秒`;
-    }, 100);
-  }
-
-  // 結束遊戲
-  function endGame(message) {
-    clearInterval(timer);
-    const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-    alert(`${message} 完成時間：${totalTime} 秒`);
-  }
-
-  // 添加卡片點擊事件
   function addCardEventListeners() {
     const cards = document.querySelectorAll(".card");
     cards.forEach((card) => {
       card.addEventListener("click", () => {
-        if (isChecking || card.classList.contains("flipped")) return;
+        if (isChecking || card.classList.contains("flipped") || flippedCards.length >= 2) return;
+
 
         if (!hasStarted) {
           hasStarted = true;
           startTimer();
-          backgroundMusic.play();
         }
 
-        flipSound.play();
         card.classList.add("flipped");
         flippedCards.push(card);
 
@@ -115,13 +140,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (card1.dataset.id === card2.dataset.id) {
             matchedPairs++;
-            matchSound.play();
             flippedCards = [];
             isChecking = false;
 
             if (matchedPairs === 10) {
-              winSound.play();
-              endGame("恭喜完成挑戰！");
+              clearInterval(timer);
+              nameModal.classList.remove("hidden");
             }
           } else {
             setTimeout(() => {
@@ -136,9 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ===== 事件綁定 =====
   restartButton.addEventListener("click", initGame);
 
-  // ===== 初始化 =====
   initGame();
 });

@@ -1,27 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memory Card Matching Game</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memory Card Game</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- 頁面標題 -->
-  <h1>洗滌標籤大挑戰！！</h1>
 
-  <!-- 顯示計時器 -->
-  <div id="game-info">
-    <p>遊戲時間：<span id="timer">0.00 秒</span></p>
+  <!-- 遊戲主區域 -->
+  <div class="game-board-container">
+    <h1>慧新衣笑大挑戰</h1> <!-- 遊戲標題 -->
+    <div id="game-info">
+      <div>
+        <!-- 顯示排行榜按鈕 -->
+        <button id="show-leaderboard">顯示排行榜</button>
+        <!-- 排行榜清單 -->
+        <ul id="leaderboard" class="hidden"></ul>
+        <!-- 清除排行榜按鈕 -->
+        <button id="clear-leaderboard">清除排行榜</button>
+      </div>
+      <!-- 計時器 -->
+      <span id="timer">0.00 秒</span>
+    </div>
+    <!-- 遊戲卡片區域 -->
+    <div class="game-board"></div>
+    <!-- 重新開始按鈕 -->
+    <button id="restart">重新開始</button>
+
+    <!-- 名稱輸入彈窗 -->
+    <div id="name-modal" class="hidden">
+      <h2>完成遊戲！請輸入姓名：</h2>
+      <input id="player-name" type="text" placeholder="您的姓名" />
+      <button id="submit-name">送出</button>
+    </div>
   </div>
 
-  <!-- 遊戲區域 -->
-  <div class="game-board"></div>
-
-  <!-- 重新開始按鈕 -->
-  <button id="restart">重新開始</button>
-
-  <!-- 引入腳本 -->
+  <!-- 外部 JavaScript 檔案 -->
   <script src="script.js"></script>
 </body>
 </html>
