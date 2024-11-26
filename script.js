@@ -32,6 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function saveScore(name, time) {
+    if (!name || isNaN(time)) {
+      console.error("Invalid score data:", { name, time });
+      return;
+    }
+  
     const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
     leaderboard.push({ name, time });
     localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
