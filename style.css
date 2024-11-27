@@ -136,6 +136,8 @@ button:hover {
   background-color: #fff;
   max-width: 200px;
   display: none; /* 預設隱藏 */
+  visibility: visible;
+  opacity: 1;
 }
 
 #leaderboard li {
@@ -186,4 +188,10 @@ button:hover {
 
 #clear-leaderboard:hover {
   background-color: #c0392b;
+}
+
+#loading {
+  font-size: 16px;
+  color: #888;
+  margin: 10px auto;
 }
